@@ -1,0 +1,42 @@
+
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=ProgId content=Excel.Sheet>
+<table border="1">
+	<tr>
+		<th>ID Ticket</th>
+		<th>Cliente</th>
+		<th>Bollettario</th>		
+		<th>Numero</th>		
+		<th>Anno</th>		
+		<th>Motivo</th>		
+		<th>Data arrivo</th>
+		<th>Data partenza</th>
+		<th>Durata</th>		
+		<th>Tecnico</th>
+		<th>Descrizione</th>
+		<th>Tipo Intervento</th>		
+		<th>Stato</th>
+		
+	</tr>
+
+  <tr>
+		<th>20</th>
+		<th>AZ.AGR. BALESTRERI </th>
+		<th>W</th>
+		<th>19</th>
+		<th>2022</th>
+		<th>posta 25 e 27 non misurano</th>
+		<th>2022-09-28 10:40:00</th>
+		<th>2022-09-28 12:00:00</th>
+		<th>01h 20min</th>
+		<th>Luca Cervati</th>
+		<th>posta 25 e 27 trovate con ghiera allentata.
+controllo funzionamento sonda e stato mini relè per accertamento ulteriore.
+serrato tutte le ghiere a tutti i misuratori.
+controllo funzionamento poste problematiche in mungitura.</th>
+		<th>RIP6</th>
+		<th>Chiuso</th>	
+
+ </tr>
+ </table></html>

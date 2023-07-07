@@ -1,0 +1,451 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+	<?
+	#### permessi
+	$req = 12; # tutti
+
+	require "inc_config.php";
+	require "inc_sicurezza_bo.php";
+
+	if (0)
+	{
+	  echo "<pre>";
+	  print_r($_REQUEST);
+
+	  print_r($_FILES);
+	  echo "</pre>";
+	}
+
+	#cliente
+	if (isset($_REQUEST['id_cliente']))
+	  $id_cliente = mysqli_real_escape_string($link,$_REQUEST['id_cliente']);
+	else $id_cliente = "";
+
+	
+	if (isset($_REQUEST['ragsoc1'])) $ragsoc1 = mysqli_real_escape_string($link,$_REQUEST['ragsoc1']); else $ragsoc1 = "";
+	if (isset($_REQUEST['ragsoc2'])) $ragsoc2 = mysqli_real_escape_string($link,$_REQUEST['ragsoc2']); else $ragsoc2 = "";
+	if (isset($_REQUEST['indirizzo'])) $indirizzo = mysqli_real_escape_string($link,$_REQUEST['indirizzo']); else $indirizzo = "";
+	if (isset($_REQUEST['localita'])) $localita = mysqli_real_escape_string($link,$_REQUEST['localita']); else $localita = "";
+	if (isset($_REQUEST['cap'])) $cap = mysqli_real_escape_string($link,$_REQUEST['cap']); else $cap = "";
+	if (isset($_REQUEST['provincia'])) $provincia = mysqli_real_escape_string($link,$_REQUEST['provincia']); else $provincia = "";
+	if (isset($_REQUEST['codfisc'])) $codfisc = mysqli_real_escape_string($link,$_REQUEST['codfisc']); else $codfisc = "";
+	if (isset($_REQUEST['piva'])) $piva = mysqli_real_escape_string($link,$_REQUEST['piva']); else $piva = "";
+	if (isset($_REQUEST['tipocliente'])) $tipocliente = mysqli_real_escape_string($link,$_REQUEST['tipocliente']); else $tipocliente = "";
+	if (isset($_REQUEST['tel1'])) $tel1 = mysqli_real_escape_string($link,$_REQUEST['tel1']); else $tel1 = "";
+	if (isset($_REQUEST['tel2'])) $tel2 = mysqli_real_escape_string($link,$_REQUEST['tel2']); else $tel2 = "";
+	if (isset($_REQUEST['email'])) $email = mysqli_real_escape_string($link,$_REQUEST['email']); else $email = "";
+	
+	
+	if (isset($_REQUEST['todo']))
+	  $todo = mysqli_real_escape_string($link,$_REQUEST['todo']);
+	else
+	  $todo = "";
+	
+	$msg_all_ko = $msg_all_ok = "";
+
+
+	// Allegato
+		
+		if ($todo == "doAll")
+		{	
+		
+		if (!$msg_all_ko)
+		  {
+				
+				$dir = BASE_PATH."upload/allegati/";
+				
+					if (!is_dir($dir))
+					{
+					  mkdir($dir);
+					  chmod($dir, 0775);
+					}
+					$dir = BASE_PATH."upload/allegati/$id_cliente/";
+					if (!is_dir($dir))
+					{
+					  mkdir($dir);
+					  chmod($dir, 0775);
+					}
+					
+				
+				if(isset($_FILES['attivita_allegato']['name'])) {
+					foreach ($_FILES['attivita_allegato']['name'] as $i => $att_allegato) {
+							  //Get the temp file path							 
+								$tmpFilePath = $_FILES['attivita_allegato']['tmp_name'][$i];
+
+								//Make sure we have a filepath
+								if($tmpFilePath != ""){
+									//save the filename
+									$shortname = $_FILES['attivita_allegato']['name'][$i];
+									//save the url and the file
+									$upload_name = $_FILES['attivita_allegato']['name'][$i];
+									$upload_path = $dir.$upload_name;
+									//Upload the file into the temp dir
+
+									if(move_uploaded_file($_FILES['attivita_allegato']['tmp_name'][$i], $upload_path)) {
+
+										$files[] = $shortname;
+											$queryAllegato = "
+											INSERT INTO allegati(id_cliente, allegato) VALUES ('$id_cliente','$upload_name')
+											";
+											doQuery($queryAllegato);
+											
+											
+									}
+									 //use $shortname for the filename
+										//use $filePath for the relative url to the file
+
+            
+						  }
+					}
+					
+			}  
+    
+		  }
+		
+					
+
+				$query = "
+			SELECT C.id
+			FROM allegati AL
+			INNER JOIN cliente C on C.id = AL.id_cliente
+			where AL.id_cliente = '$id_cliente'
+
+			";
+			$result = doQuery($query);
+			list($id_cliente_t)= mysqli_fetch_array($result);
+		
+    header("location:cliente.php?id_cliente=".$id_cliente_t."#allegati"); // redirects to all records page
+    exit;
+	
+
+				$msg_all_ok = "Allegato modificato correttamente";
+			  
+		
+		  
+		}
+		
+		
+	 //Todo
+	  
+		if (isset($_REQUEST['todo']))
+		  $todo = mysqli_real_escape_string($link,$_REQUEST['todo']);
+		else
+		  $todo = "";
+
+	$msg_anag_ko = $msg_anag_ok = "";
+
+		if ($id_cliente and $todo!="doAnag")
+	{
+	  $query = "
+	  SELECT id, ragsoc1, ragsoc2, indirizzo, localita, cap, provincia, codfisc, piva, tipocliente, tel1, tel2, email
+	  FROM cliente C
+	  WHERE 1
+		AND C.id = '$id_cliente'
+	  ";
+	  $result = doQuery($query);
+	  list($id_cliente, $ragsoc1, $ragsoc2, $indirizzo, $localita, $cap, $provincia, $codfisc, $piva, $tipocliente, $tel1, $tel2, $email 
+		   ) = mysqli_fetch_array($result);
+	}
+
+	$title = $id_cliente?"$ragsoc1":"Nuovo Cliente";
+	require "inc_header.php";
+
+
+	
+
+	?>
+	<div class="all-wrapper">
+	  <div class="row">
+		<div class="col-md-3">
+	<?require "inc_menu_sx.php"?>
+		</div>
+		<div class="col-md-9">
+
+		  <div class="content-wrapper">
+			<div class="content-inner <?=$content_inner_class?>">
+			  <div class="page-header <?=$page_header_class?>">
+				 <?require "inc_menu_oriz.php"?>
+				<h1><i class="icon-group"></i> </h1>
+			  </div>
+			  <ol class="breadcrumb">
+				<li><a href="home.php">Home</a></li>
+				<li><a href="clienti.php">Clienti</a></li>
+				<li class="active"><?=$id_cliente?$nome:"Nuovo"?></li>
+			  </ol>
+			  <div class="main-content">
+
+
+				<div class="widget">
+				  <a name="anagrafica"></a>
+				  <h3 class="section-title first-title"><i class="icon-group"></i><?=$id_cliente?"$id_cliente - $ragsoc1":"Nuovo cliente"?></h3>
+
+				  <?=$menu_int?>
+
+				  <div class="widget-content-white glossed">
+					<div class="padded">
+
+					  <h3 class="form-title form-title-first">Anagrafica</h3>
+
+					<?if ($msg_anag_ko){?>
+					<div class="widget">
+					  <div class="alert alert-danger alert-dismissable">
+						<!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> -->
+						<i class="icon-exclamation-sign"></i>
+						<strong>Attenzione!</strong> Verifica <?=substr($msg_anag_ko,0,-2)?>.
+					  </div>
+					</div>
+					<?}?>
+					<?if ($msg_anag_ok){?>
+					<div class="widget">
+					 <div class="alert alert-success alert-dismissable">
+						<i class="icon-check-sign"></i>
+						<!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> -->
+						<strong>Perfetto!</strong> <?=$msg_anag_ok?>.
+					  </div>
+					</div>
+					<?}?>
+
+					<form action="cliente.php#anag" name="frmAnag" id="frmAnag" method="post" role="form">
+					  <input type="hidden" name="id_cliente" id="id_cliente" value="<?=$id_cliente?>">
+					  <input type="hidden" name="todo" id="todo" value="doAnag">
+
+					  <div class="row">
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Ragione Sociale</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="ragsoc1" name="ragsoc1" class="form-control" placeholder="Ragione Sociale" value="<?=$ragsoc1?>">
+						  </div>
+						</div>
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Seconda Ragione Sociale</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?>  type="text" id="ragsoc2" name="ragsoc2" class="form-control" placeholder="Ragione Sociale 2" value="<?=$ragsoc2?>" >
+						  </div>
+						</div>
+						<div class="col-md-2">
+						  <div class="form-group">
+							<label>Partita IVA</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="piva" name="piva" class="form-control" placeholder="Partita IVA" value="<?=$piva?>" >
+						  </div>
+						</div>
+						<div class="col-md-2">
+						  <div class="form-group">
+							<label>Codice Fiscale</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="codfisc" name="codfisc" class="form-control" placeholder="Codice Fiscale" value="<?=$codfisc?>" >
+						  </div>
+						</div>
+						
+					  </div>
+				
+					  <div class="row">
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Città</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="localita" name="localita" class="form-control" placeholder="Città" value="<?=$localita?>" >
+						  </div>
+						</div>
+						<div class="col-md-2">
+						  <div class="form-group">
+							<label>Indirizzo</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="indirizzo" name="indirizzo" class="form-control" placeholder="Indirizzo" value="<?=$indirizzo?>" >
+						  </div>
+						</div>							
+						<div class="col-md-2">
+						  <div class="form-group">
+							<label>CAP</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?>  type="text" id="cap" name="cap" class="form-control" placeholder="CAP" value="<?=$cap?>">
+						  </div>
+						</div>
+						<div class="col-md-2">
+						  <div class="form-group">
+							<label>Provincia</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="provincia" name="provincia" class="form-control" placeholder="Provincia" value="<?=$provincia?>" >
+						  </div>
+						</div>				   
+					  </div>  
+					  
+					  <div class="row">
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Telefono</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="tel1" name="tel1" class="form-control" placeholder="Telefono" value="<?=$tel1?>" >
+						  </div>
+						</div>
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Telefono2</label>
+							<input  <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="tel2" name="tel2" class="form-control" placeholder="Telefono 2" value="<?=$tel2?>" >
+						  </div>
+						</div>
+						<div class="col-md-4">
+						  <div class="form-group">
+							<label>Email</label>
+							<input  <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="email" name="email" class="form-control" placeholder="Email" value="<?=$email?>" >
+						  </div>
+						</div>
+					   
+					  </div>					  
+
+					  <div class="row">
+						<div class="col-md-12">
+						  <div class="form-group">
+							<label>Tipo cliente</label>
+							<input <?=(isCopywriter() and $id_cliente)?"readonly":""?> type="text" id="tipocliente" name="tipocliente" class="form-control" placeholder="Tipo Cliente" value="<?=$tipocliente?>" >
+						  </div>
+						</div>
+					  </div>
+					  
+
+						  
+							<div class="row">
+							<div class="col-md-12 text-center">
+							  <button type="submit" class="btn btn-primary">Salva</button>
+							  <!-- <button type="reset" class="btn btn-default">Annulla</button> -->
+							</div>
+						  </div>
+
+					</form>
+
+				 </div>
+			   </div>
+			 </div>
+
+
+				<div class="widget">
+					  <a name="allegati"></a>
+					  <?=$menu_int?>
+
+					  <div class="widget-content-white glossed">
+						<div class="padded">
+						
+						<?if ($msg_all_ko){?>
+						<div class="widget">
+						  <div class="alert alert-danger alert-dismissable">
+							<!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> -->
+							<i class="icon-exclamation-sign"></i>
+							<strong>Attenzione!</strong> Verifica <?=substr($msg_all_ko,0,-2)?>.
+						  </div>
+						</div>
+						<?}?>
+						<?if ($msg_all_ok){?>
+						<div class="widget">
+						 <div class="alert alert-success alert-dismissable">
+							<i class="icon-check-sign"></i>
+							<!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> -->
+							<strong>Perfetto!</strong> <?=$msg_all_ok?>.
+						  </div>
+						</div>
+						<?}?>
+
+
+						  <h3 class="form-title form-title-first">Allegati</h3>
+
+						<form action="cliente.php#allegati" method="post" enctype="multipart/form-data">		
+						<input type="hidden" name="id_cliente" id="id_cliente" value="<?=$id_cliente?>">		
+						  <input type="hidden" name="todo" id="todo" value="doAll">
+						  
+						  
+						  
+						  <div class="row">
+						<div class="col-md-4">
+						<div class="form-group">
+						 <input type="file" id="attivita_allegato" name="attivita_allegato[]" class="form-control" placeholder="Allegato">
+                      </div>
+					  </div>
+					  </div>
+
+						  
+					<div class="row">
+					  <div class="padded">
+					  <a name="tbl_allegati"></a>
+					  <table class="table table-striped table-bordered table-hover datatable" style = "border-top:1px solid #dddddd; border-left:none; border-right:none; border-bottom:none;">
+						<thead>
+						
+						<tr>
+							
+							<th width="100%">Allegato</th>
+						  </tr>
+
+						</thead>
+						<tbody>
+						
+	<?
+	$query = "
+	SELECT id,allegato
+	FROM allegati
+	WHERE 1
+	  AND id_cliente = '$id_cliente'
+	ORDER BY id DESC
+	";
+	$result = doQuery($query);
+	while (list($id_allegato_t,$allegato_t) = mysqli_fetch_array($result))
+	{
+	  
+		
+		#allegato	
+	 
+		if ($allegato_t)
+		{
+		  $allegato_t = "
+		  <i class=\"icon-cloud-download\"></i>
+		  <a href=\"".BASE_URL."upload/allegati/$id_cliente/$allegato_t\" onclick=\"window.open(this.href);return false;\">$allegato_t</a>
+		  <br />
+		  <br />
+		  [".getDim(BASE_PATH."upload/allegati/$id_cliente/$allegato_t")."]&nbsp;<a href='deleteAllegato.php?id_allegato=$id_allegato_t'>Elimina</a>
+		  ";
+		}
+	  
+	?>
+
+						  <tr>
+							
+							<td>
+								<?=$allegato_t?>
+							 </td>
+						  </tr>
+	<?
+	}
+	?>
+						</tbody>
+					  </table>
+					  </div>
+					</div>
+
+
+						  
+						<div class="row">
+							<div class="col-md-12 text-center">
+							  <button type="submit" class="btn btn-primary">Salva</button>
+							  <!-- <button type="reset" class="btn btn-default">Annulla</button> -->
+							</div>
+						  </div>
+						  
+						</form>
+						
+						
+											  
+						</div>
+						</div>	
+				</div>
+
+		  </div>
+		</div>
+	  </div>
+	</div>
+	</div>
+	</div>
+
+
+	<?require "inc_footer.php"?>
+	<?
+	if (0)
+	{
+	  echo "<pre>";
+	  print_r($_REQUEST);
+
+	  print_r($_FILES);
+	  echo "</pre>";
+	}
+	?>
+	
+	
